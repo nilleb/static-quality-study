@@ -1,0 +1,12 @@
+jira: https://contoso.atlassian.net
+repo-folder: "/Users/ivo/dev/green"
+project-key: "CEG"
+git-history-limit: -1
+stop-after-this-number-of-commits-without-issues: 1000
+files-selection:
+  include:
+    - "*.py"
+    - "*.js"
+  exclude:
+    - "*/tests/*"
+coverage-report: input/green-coverage-wo-tests.xml

@@ -1,0 +1,11 @@
+isort
+lxml
+jupyter
+jira
+pyyaml
+matplotlib
+pandas
+gitpython
+black
+isort
+matplotlib-venn
