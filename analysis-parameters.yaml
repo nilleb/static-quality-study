@@ -10,3 +10,4 @@ files-selection:
   exclude:
     - "*/tests/*"
 coverage-report: input/green-coverage-wo-tests.xml
+complexity-report: input/green-radon-cc.json
