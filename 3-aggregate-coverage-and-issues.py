@@ -70,7 +70,7 @@ for clazz in xml.xpath(xpath):
 
 with open(os.path.join(step_folder, "output/jira-cc-statistics.csv"), "w") as fp:
     fp.writelines(
-        "FILE,OWNER,ISSUES,BUGS,SUPPORT_BUGS,P1,P2,P3,P4,MAX_COMPLEXITY,COVERAGE,LINES,LINES_COVERED\n"
+        "FILE,ISSUES,BUGS,SUPPORT_BUGS,P1,P2,P3,P4,MAX_COMPLEXITY,COVERAGE,LINES,LINES_COVERED\n"
     )
     for fn, issues in issues_per_file.items():
         line_rate, lines, covered = file_cc_stats.get(fn, (0.0, 0, 0))
@@ -80,7 +80,7 @@ with open(os.path.join(step_folder, "output/jira-cc-statistics.csv"), "w") as fp
         hal_volume = hal_report.get(fn, {}).get("total")
         hal_volume = hal_volume[7] if hal_volume else -1
         line = (
-            '"{filename}",{owner},{issues},{bugs},{support_bugs},'
+            '"{filename}",{issues},{bugs},{support_bugs},'
             "{p1_bugs},{p2_bugs},{p3_bugs},{p4_bugs},"
             "{complexity},{hal_volume},{cc},{lines},{lines_covered}\n"
         ).format(
