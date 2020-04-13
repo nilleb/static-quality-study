@@ -26,9 +26,13 @@ issues_per_file_path = os.path.join(step_folder, "output/issues_per_file.json",)
 bugs_support_path = os.path.join(step_folder, "output/bugs-support.csv")
 
 complexity_report = os.path.join(step_folder, configuration.get("complexity-report"))
+hal_report_path = os.path.join(step_folder, configuration.get("hal-report"))
 
 with open(complexity_report) as fp:
     complexity = json.load(fp)
+
+with open(hal_report_path) as fp:
+    hal_report = json.load(fp)
 
 with open(issues_per_file_path) as fp:
     issues_per_file = json.load(fp)
@@ -73,13 +77,15 @@ with open(os.path.join(step_folder, "output/jira-cc-statistics.csv"), "w") as fp
         fcomplexity = max(
             item["complexity"] for item in complexity.get(fn, [{"complexity": -1}])
         )
+        hal_volume = hal_report.get(fn, {}).get("total")
+        hal_volume = hal_volume[7] if hal_volume else -1
         line = (
             '"{filename}",{owner},{issues},{bugs},{support_bugs},'
             "{p1_bugs},{p2_bugs},{p3_bugs},{p4_bugs},"
-            "{complexity},{cc},{lines},{lines_covered}\n"
+            "{complexity},{hal_volume},{cc},{lines},{lines_covered}\n"
         ).format(
             filename=fn,
-            issues=len(issues),
+            issues=len(set(issues)),
             bugs=len(set(issues).intersection(known_bugs)),
             support_bugs=len(set(issues).intersection(support_bugs)),
             p1_bugs=len(set(issues).intersection(p1_bugs)),
@@ -87,6 +93,7 @@ with open(os.path.join(step_folder, "output/jira-cc-statistics.csv"), "w") as fp
             p3_bugs=len(set(issues).intersection(p3_bugs)),
             p4_bugs=len(set(issues).intersection(p4_bugs)),
             complexity=fcomplexity,
+            hal_volume=hal_volume,
             cc=line_rate,
             lines=lines,
             lines_covered=covered,
