@@ -3,6 +3,7 @@
 # FILE | ISSUES | BUGS | SUPPORT_BUGS | P1 | P2 | P3 | P4 | MAX_COMPLEXITY | COVERAGE | LINES | LINES_COVERED
 import json
 import os
+import hashlib
 
 import lxml.etree as ET
 import yaml
@@ -27,6 +28,7 @@ bugs_support_path = os.path.join(step_folder, "output/bugs-support.csv")
 
 complexity_report = os.path.join(step_folder, configuration.get("complexity-report"))
 hal_report_path = os.path.join(step_folder, configuration.get("hal-report"))
+obfuscate = configuration.get("obfuscate-filepaths", False)
 
 with open(complexity_report) as fp:
     complexity = json.load(fp)
@@ -68,9 +70,23 @@ for clazz in xml.xpath(xpath):
     file_cc_stats[filename] = (line_rate, lines, covered)
 
 
-with open(os.path.join(step_folder, "output/jira-cc-statistics.csv"), "w") as fp:
+def obfuscate_path(path):
+    if not obfuscate:
+        return path
+    filename, file_extension = os.path.splitext(path)
+    return "".join(
+        [hashlib.sha224(filename.encode("utf-8")).hexdigest(), file_extension]
+    )
+
+
+output_csv = "output/jira-cc-statistics{}.csv".format(
+    "-obfuscated" if obfuscate else ""
+)
+
+with open(os.path.join(step_folder, output_csv), "w") as fp:
     fp.writelines(
-        "FILE,ISSUES,BUGS,SUPPORT_BUGS,P1,P2,P3,P4,MAX_COMPLEXITY,COVERAGE,LINES,LINES_COVERED\n"
+        "FILE,ISSUES,BUGS,SUPPORT_BUGS,P1,P2,P3,P4,"
+        "MAX_COMPLEXITY,HAL_VOLUME,COVERAGE,LINES,LINES_COVERED\n"
     )
     for fn, issues in issues_per_file.items():
         line_rate, lines, covered = file_cc_stats.get(fn, (0.0, 0, 0))
@@ -84,7 +100,7 @@ with open(os.path.join(step_folder, "output/jira-cc-statistics.csv"), "w") as fp
             "{p1_bugs},{p2_bugs},{p3_bugs},{p4_bugs},"
             "{complexity},{hal_volume},{cc},{lines},{lines_covered}\n"
         ).format(
-            filename=fn,
+            filename=obfuscate_path(fn),
             issues=len(set(issues)),
             bugs=len(set(issues).intersection(known_bugs)),
             support_bugs=len(set(issues).intersection(support_bugs)),
